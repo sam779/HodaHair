@@ -12,12 +12,23 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Get admin's access token from cookies
-    let accessToken = req.cookies.admin_access_token;
-    const refreshToken = req.cookies.admin_refresh_token;
+    // Get admin's access token from persistent storage
+    let tokenResult;
+    try {
+      const response = await fetch(new URL('/api/admin/store-token', `https://${req.headers.host}`));
+      if (!response.ok) {
+        return res.status(401).json({ error: 'Admin calendar not configured' });
+      }
+      tokenResult = await response.json();
+    } catch (error) {
+      console.error('Token fetch error:', error);
+      return res.status(401).json({ error: 'Failed to access calendar' });
+    }
 
-    if (!refreshToken) {
-      return res.status(401).json({ error: 'Admin calendar not configured' });
+    let accessToken = tokenResult.accessToken;
+
+    if (!accessToken) {
+      return res.status(401).json({ error: 'No access token available' });
     }
 
     // If access token expired, refresh it

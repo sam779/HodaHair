@@ -55,8 +55,22 @@ export default async function handler(req, res) {
 
     const userInfo = await userInfoResponse.json();
 
-    // Store admin tokens in secure cookies and KV storage
-    // For MVP: store in environment variables (in production, use Vercel KV or database)
+    // Store tokens persistently so all client sessions can use them
+    try {
+      await fetch(new URL('/api/admin/store-token', `https://${req.headers.host}`), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          refreshToken: tokens.refresh_token,
+          accessToken: tokens.access_token,
+          expiresIn: tokens.expires_in,
+        }),
+      });
+    } catch (error) {
+      console.error('Failed to store token:', error);
+    }
+
+    // Also set cookies for admin access
     res.setHeader('Set-Cookie', [
       `admin_access_token=${tokens.access_token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${tokens.expires_in}`,
       `admin_refresh_token=${tokens.refresh_token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${7 * 24 * 60 * 60}`,
