@@ -18,7 +18,6 @@ function setupSignInButton() {
   const signInButton = document.getElementById('googleSignIn');
   if (signInButton) {
     signInButton.addEventListener('click', initiateOAuthFlow);
-    signInButton.textContent = 'Sign in with Google to Book';
   }
 }
 
