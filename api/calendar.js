@@ -6,10 +6,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { action, accessToken, timeMin, timeMax, summary, startTime, endTime, description, clientEmail } = req.body;
+    const { action, timeMin, timeMax, summary, startTime, endTime, description, clientEmail } = req.body;
+
+    // Get access token from secure cookies
+    const accessToken = req.cookies.access_token;
 
     if (!accessToken) {
-      return res.status(401).json({ error: 'Access token required' });
+      return res.status(401).json({ error: 'Not authenticated. Please sign in first.' });
     }
 
     if (action === 'getAvailability') {

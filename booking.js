@@ -37,19 +37,25 @@ function initiateOAuthFlow() {
 }
 
 function checkForAuthCode() {
-  // After redirect back from Google, check for auth code in URL
+  // After redirect back from Google, check for auth result
   const params = new URLSearchParams(window.location.search);
-  const code = params.get('code');
-  const error = params.get('error');
+  const authSuccess = params.get('auth') === 'success';
+  const authError = params.get('auth') === 'error';
 
-  if (error) {
-    console.error('OAuth error:', error);
-    alert('Authentication failed: ' + error);
+  if (authError) {
+    console.error('OAuth error during authentication');
+    alert('Authentication failed. Please try again.');
     return;
   }
 
-  if (code) {
-    exchangeCodeForTokens(code);
+  if (authSuccess) {
+    // Tokens are already set in secure cookies by backend
+    // Just show the booking widget
+    toggleBookingUI(true);
+    loadAvailableDates();
+
+    // Clean URL
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
 }
 
@@ -149,9 +155,9 @@ async function loadAvailableSlots() {
     const response = await fetch('/api/calendar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // Include cookies (access_token)
       body: JSON.stringify({
         action: 'getAvailability',
-        accessToken,
         timeMin: dayStart,
         timeMax: dayEnd,
       }),
@@ -260,9 +266,9 @@ async function confirmBooking() {
     const response = await fetch('/api/calendar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // Include cookies (access_token)
       body: JSON.stringify({
         action: 'bookSlot',
-        accessToken,
         summary: serviceType,
         startTime: startDate.toISOString(),
         endTime: endDate.toISOString(),

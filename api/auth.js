@@ -1,12 +1,24 @@
 // api/auth.js - Handle Google OAuth token exchange
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
   try {
-    const { code } = req.body;
+    // Handle both GET (from Google redirect) and POST (from frontend)
+    let code;
+
+    if (req.method === 'GET') {
+      // Google redirects with code in query parameters
+      code = req.query.code;
+      const error = req.query.error;
+
+      if (error) {
+        return res.status(400).json({ error: `Google OAuth error: ${error}` });
+      }
+    } else if (req.method === 'POST') {
+      // Frontend sends code in request body
+      code = req.body.code;
+    } else {
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
 
     if (!code) {
       return res.status(400).json({ error: 'Authorization code required' });
@@ -33,12 +45,18 @@ export default async function handler(req, res) {
 
     const tokens = await tokenResponse.json();
 
-    // Return tokens to frontend (they will be stored client-side with proper handling)
+    // Set secure cookies for tokens
     res.setHeader('Set-Cookie', [
       `refresh_token=${tokens.refresh_token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${7 * 24 * 60 * 60}`,
       `access_token=${tokens.access_token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${tokens.expires_in}`,
     ]);
 
+    // If this is a GET request from Google redirect, redirect to contact page
+    if (req.method === 'GET') {
+      return res.redirect(302, '/contact?auth=success');
+    }
+
+    // If this is a POST request from frontend, return JSON
     return res.status(200).json({
       accessToken: tokens.access_token,
       expiresIn: tokens.expires_in,
@@ -46,6 +64,12 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error('Auth error:', error);
+
+    // Redirect on error from GET request
+    if (req.method === 'GET') {
+      return res.redirect(302, '/contact?auth=error');
+    }
+
     return res.status(500).json({ error: 'Authentication failed' });
   }
 }
