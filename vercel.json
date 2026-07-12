@@ -1,0 +1,23 @@
+{
+  "buildCommand": "echo 'Static site - no build needed'",
+  "outputDirectory": ".",
+  "regions": ["iad1"],
+  "functions": {
+    "api/**/*.js": {
+      "maxDuration": 10
+    }
+  },
+  "env": [
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_REDIRECT_URI",
+    "TIMEZONE"
+  ],
+  "redirects": [
+    {
+      "source": "/auth/callback",
+      "destination": "/api/auth",
+      "permanent": false
+    }
+  ]
+}

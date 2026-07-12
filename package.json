@@ -1,0 +1,21 @@
+{
+  "name": "hoda-hair-booking",
+  "version": "1.0.0",
+  "description": "Hoda Hair - Bridal & Event Hairstylist with Google Calendar Booking",
+  "scripts": {
+    "dev": "npx vercel dev",
+    "build": "echo 'Static site with Vercel Functions'",
+    "start": "echo 'Deployed on Vercel'"
+  },
+  "keywords": [
+    "bridal",
+    "hairstylist",
+    "booking",
+    "google-calendar"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": "18.x"
+  }
+}

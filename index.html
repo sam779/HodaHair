@@ -471,55 +471,64 @@
               </div>
             </div>
 
-            <!-- Right: form -->
+            <!-- Right: Booking Widget -->
             <div class="contact-form">
-              <div id="contactFormContainer">
-                <form id="contactForm" onsubmit="handleFormSubmit(event)">
-                  <div class="form-row">
-                    <label class="form-group">
-                      <span class="form-label">Full name</span>
-                      <input type="text" class="form-input" placeholder="[ Your name ]" required>
-                    </label>
-                    <label class="form-group">
-                      <span class="form-label">Email</span>
-                      <input type="email" class="form-input" placeholder="[ you@email.com ]" required>
-                    </label>
-                  </div>
+              <!-- Sign In Section -->
+              <div id="auth-section">
+                <p style="font-size:14px;line-height:1.8;color:rgba(246,241,233,.7);margin-bottom:24px">Click below to sign in with your Google account and book your appointment directly on our calendar. You'll see real-time availability and receive automatic confirmations.</p>
+                <div id="googleSignIn" style="margin:24px 0"></div>
+              </div>
 
-                  <div class="form-row">
-                    <label class="form-group">
-                      <span class="form-label">Event date</span>
-                      <input type="text" class="form-input" placeholder="[ DD / MM / YYYY ]" required>
-                    </label>
-                    <label class="form-group">
-                      <span class="form-label">Service type</span>
-                      <select class="form-select" required>
-                        <option>Bridal Hair</option>
-                        <option>Event Hair</option>
-                        <option>Trial Session</option>
-                        <option>Photoshoot / Editorial</option>
-                        <option>Special Occasion</option>
-                      </select>
-                    </label>
-                  </div>
+              <!-- Booking Widget Section (Hidden by default) -->
+              <div id="booking-section" style="display:none">
+                <div style="margin-bottom:28px">
+                  <button id="signOutBtn" class="btn" style="background:transparent;border:1px solid rgba(246,241,233,.3);color:#f6f1e9;padding:10px 16px;font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer">Sign Out</button>
+                </div>
 
-                  <div class="form-row">
-                    <label class="form-group">
-                      <span class="form-label">Party size</span>
-                      <input type="text" class="form-input" placeholder="[ e.g. bride + 3 ]" required>
-                    </label>
-                    <label class="form-group">
-                      <span class="form-label">Location</span>
-                      <input type="text" class="form-input" placeholder="[ Venue / city ]" required>
-                    </label>
-                  </div>
-
+                <form style="display:grid;gap:20px">
+                  <!-- Client Name -->
                   <label class="form-group">
-                    <span class="form-label">Special notes</span>
-                    <textarea class="form-textarea" rows="4" placeholder="[ Tell Hoda about your vision, timings, and any inspiration ]"></textarea>
+                    <span class="form-label">Your name</span>
+                    <input type="text" id="clientName" class="form-input" placeholder="[ Your name ]">
                   </label>
 
-                  <button type="submit" class="btn btn-primary">Send enquiry</button>
+                  <!-- Client Email -->
+                  <label class="form-group">
+                    <span class="form-label">Your email</span>
+                    <input type="email" id="clientEmail" class="form-input" placeholder="[ your@email.com ]">
+                  </label>
+
+                  <!-- Service Type -->
+                  <label class="form-group">
+                    <span class="form-label">Service type</span>
+                    <select id="serviceType" class="form-select">
+                      <option>Bridal Hair - 2 hours</option>
+                      <option>Event Hair - 1.5 hours</option>
+                      <option>Trial Session - 1.5 hours</option>
+                      <option>Photoshoot / Editorial - 3 hours</option>
+                      <option>Special Occasion - 2 hours</option>
+                    </select>
+                  </label>
+
+                  <!-- Date Picker -->
+                  <label class="form-group">
+                    <span class="form-label">Select date</span>
+                    <input type="date" id="selectedDate" class="form-input" required>
+                  </label>
+
+                  <!-- Loading indicator -->
+                  <div id="loadingSlots" style="display:none;font-size:12px;color:#c9a86a">Loading available times...</div>
+
+                  <!-- Time Slot -->
+                  <label class="form-group">
+                    <span class="form-label">Select time</span>
+                    <select id="timeSlot" class="form-select">
+                      <option>Select a date first</option>
+                    </select>
+                  </label>
+
+                  <!-- Confirm Button -->
+                  <button type="button" id="confirmBooking" class="btn btn-primary" style="align-self:flex-start">Confirm Booking</button>
                 </form>
               </div>
             </div>
@@ -595,5 +604,6 @@
 </div>
 
 <script src="./app.js"></script>
+<script src="./booking.js"></script>
 </body>
 </html>

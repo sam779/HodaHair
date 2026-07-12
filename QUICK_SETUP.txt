@@ -1,0 +1,152 @@
+═══════════════════════════════════════════════════════════════════════════════
+  GOOGLE CALENDAR BOOKING - QUICK SETUP CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ FILES ALREADY CREATED (no changes needed):
+
+  Backend:
+  ├─ api/auth.js               → OAuth token exchange
+  ├─ api/calendar.js           → Calendar operations
+
+  Frontend:
+  ├─ booking.js                → Booking widget logic
+  ├─ index.html                → Updated with booking widget
+
+  Configuration:
+  ├─ vercel.json               → Vercel deployment config
+  ├─ package.json              → Node dependencies
+
+  Documentation:
+  ├─ BOOKING_SETUP.md          → Full setup guide
+  └─ IMPLEMENTATION_SUMMARY.md → Detailed summary
+
+
+───────────────────────────────────────────────────────────────────────────────
+⏳ YOU MUST DO THESE 3 THINGS:
+───────────────────────────────────────────────────────────────────────────────
+
+[1] CREATE: c:\Hoda Hair\.env.local
+    ─────────────────────────────────
+    GOOGLE_CLIENT_ID=YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com
+    GOOGLE_CLIENT_SECRET=YOUR_OAUTH_CLIENT_SECRET
+    GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth
+    TIMEZONE=America/New_York
+
+
+[2] UPDATE: c:\Hoda Hair\booking.js (Line 4)
+    ──────────────────────────────────────────
+    FIND:
+      const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+
+    REPLACE WITH:
+      const CLIENT_ID = '123456789012-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com';
+
+    (Use your actual Google Client ID)
+
+
+[3] DEPLOY TO VERCEL
+    ─────────────────
+    npm install
+    vercel
+
+    Then in Vercel Dashboard > Environment Variables, add:
+    • GOOGLE_CLIENT_ID
+    • GOOGLE_CLIENT_SECRET
+    • GOOGLE_REDIRECT_URI=https://your-vercel-domain.vercel.app/api/auth
+    • TIMEZONE
+
+    Then update Google Cloud Console OAuth redirect URI to Vercel URL
+
+
+───────────────────────────────────────────────────────────────────────────────
+📍 EXACT FILE LOCATIONS
+───────────────────────────────────────────────────────────────────────────────
+
+PROJECT ROOT: c:\Hoda Hair\
+
+Backend API Routes:
+  c:\Hoda Hair\api\auth.js
+  c:\Hoda Hair\api\calendar.js
+
+Frontend:
+  c:\Hoda Hair\booking.js          ← UPDATE LINE 4
+  c:\Hoda Hair\index.html
+
+Configuration:
+  c:\Hoda Hair\.env.local          ← CREATE THIS FILE
+  c:\Hoda Hair\.env.local.example  ← Reference template
+  c:\Hoda Hair\vercel.json
+  c:\Hoda Hair\package.json
+
+Documentation:
+  c:\Hoda Hair\BOOKING_SETUP.md
+  c:\Hoda Hair\IMPLEMENTATION_SUMMARY.md
+  c:\Hoda Hair\QUICK_SETUP.txt     ← This file
+
+
+───────────────────────────────────────────────────────────────────────────────
+🧪 TEST LOCALLY
+───────────────────────────────────────────────────────────────────────────────
+
+After making the 3 changes above:
+
+  cd c:\Hoda Hair
+  npm install
+  npm run dev
+
+Then visit: http://localhost:3000/contact
+
+Click "Sign in with Google to Book" to test the booking widget
+
+
+───────────────────────────────────────────────────────────────────────────────
+📝 WHERE TO FIND YOUR GOOGLE CREDENTIALS
+───────────────────────────────────────────────────────────────────────────────
+
+1. Go to: https://console.cloud.google.com/
+2. Select your project
+3. Go to: APIs & Services > Credentials
+4. Find "OAuth 2.0 Client IDs" section
+5. Click the Web application credential
+6. Copy:
+   • Client ID
+   • Client Secret
+
+
+───────────────────────────────────────────────────────────────────────────────
+⏱️ ESTIMATED TIME
+───────────────────────────────────────────────────────────────────────────────
+
+  [1] Create .env.local           ~2 min
+  [2] Update booking.js           ~1 min
+  [3] Deploy to Vercel            ~5 min
+
+  Total: ~10 minutes
+
+
+───────────────────────────────────────────────────────────────────────────────
+✨ THAT'S IT!
+───────────────────────────────────────────────────────────────────────────────
+
+After these 3 steps, the booking system is fully functional.
+
+Your customer just needs to:
+  1. Visit the website
+  2. Click "Sign in with Google"
+  3. Grant permission
+
+And their booking system is live with real-time availability from their
+Google Calendar.
+
+
+───────────────────────────────────────────────────────────────────────────────
+📞 NEED HELP?
+───────────────────────────────────────────────────────────────────────────────
+
+See BOOKING_SETUP.md for:
+  • Complete setup instructions
+  • Troubleshooting guide
+  • Customization options
+  • Security notes
+
+═══════════════════════════════════════════════════════════════════════════════
