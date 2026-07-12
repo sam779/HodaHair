@@ -11,7 +11,7 @@ export default async function handler(req, res) {
       const error = req.query.error;
 
       if (error) {
-        return res.redirect(302, `/admin-setup.html?error=${encodeURIComponent(error)}`);
+        return res.redirect(302, `/admin?error=${encodeURIComponent(error)}`);
       }
     } else if (req.method === 'POST') {
       // Frontend sends code in request body
@@ -65,7 +65,7 @@ export default async function handler(req, res) {
 
     // If this is a GET request from Google redirect, redirect to success page
     if (req.method === 'GET') {
-      return res.redirect(302, `/admin-setup.html?success=true`);
+      return res.redirect(302, `/admin?success=true`);
     }
 
     // If this is a POST request, return JSON
@@ -78,7 +78,7 @@ export default async function handler(req, res) {
     console.error('Admin auth error:', error);
 
     if (req.method === 'GET') {
-      return res.redirect(302, `/admin-setup.html?error=Authentication failed`);
+      return res.redirect(302, `/admin?error=Authentication failed`);
     }
 
     return res.status(500).json({ error: 'Authentication failed' });

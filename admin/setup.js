@@ -7,7 +7,18 @@ const SCOPES = 'https://www.googleapis.com/auth/calendar https://www.googleapis.
 // Check for auth callback
 window.addEventListener('DOMContentLoaded', () => {
   checkForAuthCallback();
+  checkForErrorInURL();
 });
+
+function checkForErrorInURL() {
+  const params = new URLSearchParams(window.location.search);
+  const error = params.get('error');
+
+  if (error) {
+    showError(decodeURIComponent(error));
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+}
 
 function initiateSetup() {
   const params = new URLSearchParams({
