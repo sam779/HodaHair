@@ -1,73 +1,83 @@
 // booking.js - Frontend booking widget logic
 
-const CLIENT_ID = '101202414160-tm8palr7hk0jsqfjdgb75rsui1c0nt12.apps.googleusercontent.com'; // Replace with your Client ID
-const SCOPES = ['https://www.googleapis.com/auth/calendar'];
+const CLIENT_ID = '101202414160-tm8palr7hk0jsqfjdgb75rsui1c0nt12.apps.googleusercontent.com';
+const REDIRECT_URI = window.location.origin + '/api/auth';
+const SCOPES = 'https://www.googleapis.com/auth/calendar';
 
 let accessToken = null;
 let refreshToken = null;
 
-// Initialize Google Sign-In on page load
+// Initialize on page load
 window.addEventListener('DOMContentLoaded', () => {
-  initializeGoogleSignIn();
   setupEventListeners();
+  setupSignInButton();
+  checkForAuthCode();
 });
 
-function initializeGoogleSignIn() {
-  // Load the Google Identity Services Library
-  const script = document.createElement('script');
-  script.src = 'https://accounts.google.com/gsi/client';
-  script.async = true;
-  script.defer = true;
-  script.onload = () => {
-    google.accounts.id.initialize({
-      client_id: CLIENT_ID,
-      callback: handleSignInResponse,
-      auto_select: false,
-    });
-
-    // Render the Sign-In button
-    const signInButton = document.getElementById('googleSignIn');
-    if (signInButton) {
-      google.accounts.id.renderButton(signInButton, {
-        theme: 'outline',
-        size: 'large',
-        text: 'continue_with',
-      });
-    }
-  };
-  document.head.appendChild(script);
+function setupSignInButton() {
+  const signInButton = document.getElementById('googleSignIn');
+  if (signInButton) {
+    signInButton.addEventListener('click', initiateOAuthFlow);
+    signInButton.textContent = 'Sign in with Google to Book';
+  }
 }
 
-async function handleSignInResponse(response) {
-  try {
-    if (!response.credential) {
-      console.error('No credential received');
-      return;
-    }
+function initiateOAuthFlow() {
+  // Construct OAuth 2.0 authorization URL
+  const params = new URLSearchParams({
+    client_id: CLIENT_ID,
+    redirect_uri: REDIRECT_URI,
+    response_type: 'code',
+    scope: SCOPES,
+    access_type: 'offline',
+    prompt: 'consent',
+  });
 
-    // Send credential to backend to exchange for access token
+  window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+}
+
+function checkForAuthCode() {
+  // After redirect back from Google, check for auth code in URL
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const error = params.get('error');
+
+  if (error) {
+    console.error('OAuth error:', error);
+    alert('Authentication failed: ' + error);
+    return;
+  }
+
+  if (code) {
+    exchangeCodeForTokens(code);
+  }
+}
+
+async function exchangeCodeForTokens(code) {
+  try {
     const result = await fetch('/api/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: response.credential }),
+      body: JSON.stringify({ code }),
     });
 
     if (!result.ok) {
-      throw new Error('Authentication failed');
+      throw new Error('Token exchange failed');
     }
 
     const tokens = await result.json();
     accessToken = tokens.accessToken;
     refreshToken = tokens.refreshToken;
 
-    // Hide sign-in, show booking widget
-    toggleBookingUI(true);
+    // Clean URL
+    window.history.replaceState({}, document.title, window.location.pathname);
 
-    // Load available dates
+    // Show booking widget
+    toggleBookingUI(true);
     await loadAvailableDates();
   } catch (error) {
-    console.error('Sign-in error:', error);
-    alert('Failed to sign in. Please try again.');
+    console.error('Token exchange error:', error);
+    alert('Failed to authenticate. Please try again.');
   }
 }
 
