@@ -1,5 +1,7 @@
 // api/booking/availability.js - Get available times from admin's calendar
 
+import { getAccessToken, getRefreshToken, isTokenExpired, updateAccessToken } from '../../lib/token-store.js';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -12,32 +14,26 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'timeMin and timeMax required' });
     }
 
-    // Get admin's access token from persistent storage
-    let tokenResult;
-    try {
-      const response = await fetch(new URL('/api/admin/store-token', `https://${req.headers.host}`));
-      if (!response.ok) {
-        return res.status(401).json({ error: 'Admin calendar not configured. Please complete setup.' });
-      }
-      tokenResult = await response.json();
-    } catch (error) {
-      console.error('Token fetch error:', error);
-      return res.status(401).json({ error: 'Failed to access calendar' });
-    }
-
-    let accessToken = tokenResult.accessToken;
+    // Get admin's access token from token store
+    let accessToken = getAccessToken();
 
     if (!accessToken) {
-      return res.status(401).json({ error: 'No access token available' });
+      return res.status(401).json({ error: 'Admin calendar not configured. Please complete setup.' });
     }
 
     // If access token expired, refresh it
-    if (!accessToken) {
-      const refreshResult = await refreshAdminToken(refreshToken, res);
+    if (isTokenExpired()) {
+      const refreshToken = getRefreshToken();
+      if (!refreshToken) {
+        return res.status(401).json({ error: 'No refresh token available' });
+      }
+
+      const refreshResult = await refreshAdminToken(refreshToken);
       if (!refreshResult.success) {
         return res.status(401).json({ error: 'Failed to refresh token' });
       }
       accessToken = refreshResult.accessToken;
+      updateAccessToken(accessToken, refreshResult.expiresIn);
     }
 
     // Fetch calendar events
@@ -52,9 +48,11 @@ export default async function handler(req, res) {
     if (!eventsResponse.ok) {
       if (eventsResponse.status === 401) {
         // Token invalid, try to refresh
+        const refreshToken = getRefreshToken();
         if (refreshToken) {
-          const refreshResult = await refreshAdminToken(refreshToken, res);
+          const refreshResult = await refreshAdminToken(refreshToken);
           if (refreshResult.success) {
+            updateAccessToken(refreshResult.accessToken, refreshResult.expiresIn);
             // Retry the request with new token
             const retryResponse = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
               method: 'GET',
@@ -106,7 +104,7 @@ function extractBusySlots(events, timeMin, timeMax) {
     }));
 }
 
-async function refreshAdminToken(refreshToken, res) {
+async function refreshAdminToken(refreshToken) {
   try {
     const response = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -125,12 +123,7 @@ async function refreshAdminToken(refreshToken, res) {
 
     const tokens = await response.json();
 
-    // Update cookie with new access token
-    res.setHeader('Set-Cookie',
-      `admin_access_token=${tokens.access_token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${tokens.expires_in}`
-    );
-
-    return { success: true, accessToken: tokens.access_token };
+    return { success: true, accessToken: tokens.access_token, expiresIn: tokens.expires_in };
   } catch (error) {
     console.error('Token refresh error:', error);
     return { success: false };

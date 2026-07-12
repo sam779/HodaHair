@@ -123,8 +123,11 @@ function changePage(page) {
   // Reset form if going to contact
   if (page === 'contact') {
     formSubmitted = false;
-    document.getElementById('contactForm').reset();
-    updateContactFormUI();
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+      contactForm.reset();
+      updateContactFormUI();
+    }
   }
 
   // Scroll to top

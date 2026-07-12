@@ -1,5 +1,7 @@
 // api/admin/auth.js - Handle customer's one-time Google Calendar authorization
 
+import { storeTokens } from '../../lib/token-store.js';
+
 export default async function handler(req, res) {
   try {
     // Handle both GET (from Google redirect) and POST (from frontend)
@@ -55,20 +57,8 @@ export default async function handler(req, res) {
 
     const userInfo = await userInfoResponse.json();
 
-    // Store tokens persistently so all client sessions can use them
-    try {
-      await fetch(new URL('/api/admin/store-token', `https://${req.headers.host}`), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          refreshToken: tokens.refresh_token,
-          accessToken: tokens.access_token,
-          expiresIn: tokens.expires_in,
-        }),
-      });
-    } catch (error) {
-      console.error('Failed to store token:', error);
-    }
+    // Store tokens in memory so all client sessions can use them
+    storeTokens(tokens.refresh_token, tokens.access_token, tokens.expires_in);
 
     // Also set cookies for admin access
     res.setHeader('Set-Cookie', [
