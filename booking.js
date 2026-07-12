@@ -41,22 +41,46 @@ function checkForAuthCode() {
   const params = new URLSearchParams(window.location.search);
   const authSuccess = params.get('auth') === 'success';
   const authError = params.get('auth') === 'error';
+  const page = params.get('page');
 
   if (authError) {
     console.error('OAuth error during authentication');
     alert('Authentication failed. Please try again.');
+    // Clean URL
+    window.history.replaceState({}, document.title, window.location.pathname);
     return;
   }
 
   if (authSuccess) {
     // Tokens are already set in secure cookies by backend
-    // Just show the booking widget
+    // Navigate to contact page if specified
+    if (page === 'contact') {
+      changePage('contact');
+    }
+
+    // Show the booking widget
     toggleBookingUI(true);
     loadAvailableDates();
 
     // Clean URL
     window.history.replaceState({}, document.title, window.location.pathname);
   }
+}
+
+// Export changePage for use in this file
+function changePage(page) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  // Show selected page
+  document.getElementById(page).classList.add('active');
+
+  // Update nav links
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.classList.toggle('active', link.dataset.page === page);
+  });
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
 async function exchangeCodeForTokens(code) {

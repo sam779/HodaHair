@@ -51,9 +51,9 @@ export default async function handler(req, res) {
       `access_token=${tokens.access_token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${tokens.expires_in}`,
     ]);
 
-    // If this is a GET request from Google redirect, redirect to contact page
+    // If this is a GET request from Google redirect, redirect to home with success flag
     if (req.method === 'GET') {
-      return res.redirect(302, '/contact?auth=success');
+      return res.redirect(302, '/?auth=success&page=contact');
     }
 
     // If this is a POST request from frontend, return JSON
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
 
     // Redirect on error from GET request
     if (req.method === 'GET') {
-      return res.redirect(302, '/contact?auth=error');
+      return res.redirect(302, '/?auth=error&page=contact');
     }
 
     return res.status(500).json({ error: 'Authentication failed' });
