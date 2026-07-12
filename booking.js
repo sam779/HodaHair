@@ -1,134 +1,24 @@
-// booking.js - Frontend booking widget logic
+// booking.js - Public booking form (no authentication needed)
 
-const CLIENT_ID = '101202414160-tm8palr7hk0jsqfjdgb75rsui1c0nt12.apps.googleusercontent.com';
-const REDIRECT_URI = window.location.origin + '/api/auth';
-const SCOPES = 'https://www.googleapis.com/auth/calendar';
-
-let accessToken = null;
-let refreshToken = null;
+let selectedDate = null;
 
 // Initialize on page load
 window.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
-  setupSignInButton();
-  checkForAuthCode();
+  // Show booking form immediately
+  showBookingWidget();
 });
 
-function setupSignInButton() {
-  const signInButton = document.getElementById('googleSignIn');
-  if (signInButton) {
-    signInButton.addEventListener('click', initiateOAuthFlow);
-  }
-}
-
-function initiateOAuthFlow() {
-  // Construct OAuth 2.0 authorization URL
-  const params = new URLSearchParams({
-    client_id: CLIENT_ID,
-    redirect_uri: REDIRECT_URI,
-    response_type: 'code',
-    scope: SCOPES,
-    access_type: 'offline',
-    prompt: 'consent',
-  });
-
-  window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-}
-
-function checkForAuthCode() {
-  // After redirect back from Google, check for auth result
-  const params = new URLSearchParams(window.location.search);
-  const authSuccess = params.get('auth') === 'success';
-  const authError = params.get('auth') === 'error';
-  const page = params.get('page');
-
-  if (authError) {
-    console.error('OAuth error during authentication');
-    alert('Authentication failed. Please try again.');
-    // Clean URL
-    window.history.replaceState({}, document.title, window.location.pathname);
-    return;
-  }
-
-  if (authSuccess) {
-    // Tokens are already set in secure cookies by backend
-    // Navigate to contact page if specified
-    if (page === 'contact') {
-      changePage('contact');
-    }
-
-    // Show the booking widget
-    toggleBookingUI(true);
-    loadAvailableDates();
-
-    // Clean URL
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
-}
-
-// Export changePage for use in this file
-function changePage(page) {
-  // Hide all pages
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  // Show selected page
-  document.getElementById(page).classList.add('active');
-
-  // Update nav links
-  document.querySelectorAll('.nav-link').forEach(link => {
-    link.classList.toggle('active', link.dataset.page === page);
-  });
-
-  // Scroll to top
-  window.scrollTo({ top: 0, behavior: 'auto' });
-}
-
-async function exchangeCodeForTokens(code) {
-  try {
-    const result = await fetch('/api/auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code }),
-    });
-
-    if (!result.ok) {
-      throw new Error('Token exchange failed');
-    }
-
-    const tokens = await result.json();
-    accessToken = tokens.accessToken;
-    refreshToken = tokens.refreshToken;
-
-    // Clean URL
-    window.history.replaceState({}, document.title, window.location.pathname);
-
-    // Show booking widget
-    toggleBookingUI(true);
-    await loadAvailableDates();
-  } catch (error) {
-    console.error('Token exchange error:', error);
-    alert('Failed to authenticate. Please try again.');
-  }
-}
-
-function toggleBookingUI(show) {
-  const authSection = document.getElementById('auth-section');
+function showBookingWidget() {
   const bookingSection = document.getElementById('booking-section');
-
-  if (show) {
-    authSection.style.display = 'none';
+  if (bookingSection) {
     bookingSection.style.display = 'block';
-  } else {
-    authSection.style.display = 'block';
-    bookingSection.style.display = 'none';
-    accessToken = null;
-    refreshToken = null;
   }
 }
 
 function setupEventListeners() {
   const dateInput = document.getElementById('selectedDate');
   const confirmBtn = document.getElementById('confirmBooking');
-  const signOutBtn = document.getElementById('signOutBtn');
 
   if (dateInput) {
     dateInput.addEventListener('change', loadAvailableSlots);
@@ -137,22 +27,6 @@ function setupEventListeners() {
 
   if (confirmBtn) {
     confirmBtn.addEventListener('click', confirmBooking);
-  }
-
-  if (signOutBtn) {
-    signOutBtn.addEventListener('click', () => {
-      google.accounts.id.disableAutoSelect();
-      toggleBookingUI(false);
-    });
-  }
-}
-
-async function loadAvailableDates() {
-  // This is optional - if you want to disable fully booked dates
-  // For now, we'll just set up the date input to be usable
-  const dateInput = document.getElementById('selectedDate');
-  if (dateInput) {
-    dateInput.focus();
   }
 }
 
@@ -175,23 +49,16 @@ async function loadAvailableSlots() {
     const dayStart = new Date(selectedDate + 'T00:00:00').toISOString();
     const dayEnd = new Date(selectedDate + 'T23:59:59').toISOString();
 
-    const response = await fetch('/api/calendar', {
+    const response = await fetch('/api/booking/availability', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Include cookies (access_token)
       body: JSON.stringify({
-        action: 'getAvailability',
         timeMin: dayStart,
         timeMax: dayEnd,
       }),
     });
 
     if (!response.ok) {
-      if (response.status === 401) {
-        // Token expired, need to re-authenticate
-        handleTokenExpired();
-        return;
-      }
       throw new Error('Failed to fetch availability');
     }
 
@@ -255,11 +122,6 @@ function getServiceDuration() {
 }
 
 async function confirmBooking() {
-  if (!accessToken) {
-    alert('Please sign in first');
-    return;
-  }
-
   const dateInput = document.getElementById('selectedDate');
   const timeSlotSelect = document.getElementById('timeSlot');
   const serviceSelect = document.getElementById('serviceType');
@@ -276,6 +138,11 @@ async function confirmBooking() {
   const clientEmail = clientEmailInput?.value || '';
   const serviceType = serviceSelect.options[serviceSelect.selectedIndex].text;
 
+  if (!clientName || !clientEmail) {
+    alert('Please enter your name and email');
+    return;
+  }
+
   // Disable button during submission
   confirmBtn.disabled = true;
   confirmBtn.textContent = 'Booking...';
@@ -286,25 +153,20 @@ async function confirmBooking() {
     const startDate = new Date(startTime);
     const endDate = new Date(startDate.getTime() + duration * 60 * 60 * 1000);
 
-    const response = await fetch('/api/calendar', {
+    const response = await fetch('/api/booking/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Include cookies (access_token)
       body: JSON.stringify({
-        action: 'bookSlot',
         summary: serviceType,
         startTime: startDate.toISOString(),
         endTime: endDate.toISOString(),
         description: `Client: ${clientName}\nEmail: ${clientEmail}`,
+        clientName,
         clientEmail,
       }),
     });
 
     if (!response.ok) {
-      if (response.status === 401) {
-        handleTokenExpired();
-        return;
-      }
       throw new Error('Failed to create booking');
     }
 
@@ -341,7 +203,7 @@ function showBookingSuccess(serviceType, startDate, clientName) {
         <strong>${serviceType}</strong><br>
         ${startDate.toLocaleDateString()} at ${startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}<br>
         <br>
-        A confirmation email has been sent. You can manage this booking in Google Calendar.
+        A confirmation email has been sent to your inbox. The appointment has been added to the calendar.
       </p>
     </div>
   `;
@@ -352,33 +214,3 @@ function showBookingSuccess(serviceType, startDate, clientName) {
     successMessage.remove();
   }, 4000);
 }
-
-function handleTokenExpired() {
-  alert('Your session has expired. Please sign in again.');
-  toggleBookingUI(false);
-  accessToken = null;
-  refreshToken = null;
-}
-
-// Optional: Refresh token before it expires (implement if using long-term bookings)
-async function refreshAccessToken() {
-  if (!refreshToken) return;
-
-  try {
-    const response = await fetch('/api/auth/refresh', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
-    });
-
-    if (response.ok) {
-      const tokens = await response.json();
-      accessToken = tokens.accessToken;
-    }
-  } catch (error) {
-    console.error('Token refresh failed:', error);
-  }
-}
-
-// Set up periodic token refresh (every 50 minutes)
-setInterval(refreshAccessToken, 50 * 60 * 1000);

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoda Hair - Admin Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: #f6f1e9;
+    color: #17130f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .container {
+    max-width: 500px;
+    background: white;
+    padding: 60px 40px;
+    border-radius: 4px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  }
+
+  .logo {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .logo-word {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+    font-size: 32px;
+    color: #17130f;
+    line-height: 1;
+  }
+
+  .logo-sub {
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: #c9a86a;
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 36px;
+    line-height: 1.2;
+    margin: 30px 0 20px;
+    text-align: center;
+    color: #17130f;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #5a4c3d;
+    text-align: center;
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  .status {
+    margin: 30px 0;
+    padding: 20px;
+    border-radius: 4px;
+    text-align: center;
+    display: none;
+  }
+
+  .status.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    display: block;
+  }
+
+  .status.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    display: block;
+  }
+
+  .status.info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+    display: block;
+  }
+
+  .btn {
+    width: 100%;
+    background: #c9a86a;
+    color: #17130f;
+    padding: 16px;
+    border: none;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.3s;
+    margin: 20px 0;
+  }
+
+  .btn:hover {
+    background: #e0c48a;
+  }
+
+  .btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+
+  .info-box {
+    background: #f6f1e9;
+    padding: 20px;
+    border-radius: 4px;
+    margin: 20px 0;
+    font-size: 13px;
+    color: #5a4c3d;
+    line-height: 1.6;
+  }
+
+  .step {
+    margin: 30px 0;
+  }
+
+  .step-number {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background: #c9a86a;
+    color: #17130f;
+    text-align: center;
+    line-height: 30px;
+    border-radius: 50%;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+
+  .step-title {
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .step-desc {
+    font-size: 13px;
+    color: #5a4c3d;
+    margin-left: 40px;
+  }
+
+  .link {
+    color: #c9a86a;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .link:hover {
+    text-decoration: underline;
+  }
+
+  .loader {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #c9a86a;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo">
+    <span class="logo-word">Hoda Hair</span>
+    <div class="logo-sub">Admin Setup</div>
+  </div>
+
+  <h1>Calendar Setup</h1>
+  <p class="subtitle">Connect your Google Calendar to enable online booking</p>
+
+  <div id="setupContent">
+    <div class="step">
+      <span class="step-number">1</span>
+      <div class="step-title">Authorization</div>
+      <div class="step-desc">
+        Click the button below to sign in with your Google account and grant access to your calendar.
+      </div>
+    </div>
+
+    <button class="btn" id="setupBtn" onclick="initiateSetup()">
+      Sign in with Google
+    </button>
+
+    <div class="info-box">
+      <strong>What happens:</strong><br>
+      • You'll be redirected to Google to sign in<br>
+      • We'll ask for permission to access your calendar<br>
+      • Your refresh token will be securely stored<br>
+      • Clients can then book without logging in
+    </div>
+  </div>
+
+  <div id="successContent" style="display: none;">
+    <div class="status success">
+      <strong>✓ Setup Complete!</strong><br>
+      Your calendar is now connected. Clients can book appointments on your website.
+    </div>
+
+    <div class="info-box">
+      <strong>Next steps:</strong><br>
+      • Share your website URL with clients<br>
+      • They can now see your availability and book<br>
+      • Bookings will appear in your calendar automatically
+    </div>
+
+    <a href="/" class="btn" style="background: #c9a86a; color: #17130f; text-align: center; text-decoration: none; display: block;">
+      Back to Website
+    </a>
+  </div>
+
+  <div id="errorContent" style="display: none;">
+    <div class="status error" id="errorMsg"></div>
+    <button class="btn" onclick="location.reload()">Try Again</button>
+  </div>
+</div>
+
+<script src="./admin-setup.js"></script>
+
+</body>
+</html>

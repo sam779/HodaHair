@@ -48,3 +48,5 @@ logs/
 # Local testing
 localhost.env
 local.env
+
+.vercel
