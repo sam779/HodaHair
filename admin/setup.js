@@ -1,4 +1,4 @@
-// admin-setup.js - Handle customer's one-time Google Calendar authorization
+// admin/setup.js - Handle customer's one-time Google Calendar authorization
 
 const CLIENT_ID = '101202414160-tm8palr7hk0jsqfjdgb75rsui1c0nt12.apps.googleusercontent.com';
 const REDIRECT_URI = window.location.origin + '/api/admin/auth';
