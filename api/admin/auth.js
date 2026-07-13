@@ -49,6 +49,7 @@ export default async function handler(req, res) {
     }
 
     const tokens = await tokenResponse.json();
+    console.log('[admin/auth] Got tokens from Google:', { hasRefreshToken: !!tokens.refresh_token, hasAccessToken: !!tokens.access_token });
 
     // Get user info to store with the token
     const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
@@ -56,9 +57,19 @@ export default async function handler(req, res) {
     });
 
     const userInfo = await userInfoResponse.json();
+    console.log('[admin/auth] Got user info:', userInfo.email);
 
-    // Store tokens in memory so all client sessions can use them
-    storeTokens(tokens.refresh_token, tokens.access_token, tokens.expires_in);
+    // Store tokens in KV so all client sessions can use them
+    try {
+      await storeTokens(tokens.refresh_token, tokens.access_token, tokens.expires_in);
+      console.log('[admin/auth] Tokens stored in KV successfully');
+    } catch (error) {
+      console.error('[admin/auth] Failed to store tokens in KV:', error);
+      if (req.method === 'GET') {
+        return res.redirect(302, `/admin?error=Failed to store tokens: ${error.message}`);
+      }
+      return res.status(500).json({ error: 'Failed to store tokens' });
+    }
 
     // Also set cookies for admin access
     res.setHeader('Set-Cookie', [

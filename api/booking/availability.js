@@ -15,9 +15,17 @@ export default async function handler(req, res) {
     }
 
     // Get admin's access token from token store
-    let accessToken = await getAccessToken();
+    let accessToken;
+    try {
+      accessToken = await getAccessToken();
+      console.log('[availability] Got access token:', accessToken ? 'present' : 'null');
+    } catch (error) {
+      console.error('[availability] Error getting access token:', error);
+      return res.status(500).json({ error: 'Token store error: ' + error.message });
+    }
 
     if (!accessToken) {
+      console.log('[availability] No access token - user needs to complete setup');
       return res.status(401).json({ error: 'Admin calendar not configured. Please complete setup.' });
     }
 
