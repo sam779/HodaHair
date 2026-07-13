@@ -15,15 +15,16 @@ export default async function handler(req, res) {
     }
 
     // Get admin's access token from token store
-    let accessToken = getAccessToken();
+    let accessToken = await getAccessToken();
 
     if (!accessToken) {
       return res.status(401).json({ error: 'Admin calendar not configured. Please complete setup.' });
     }
 
     // If access token expired, refresh it
-    if (isTokenExpired()) {
-      const refreshToken = getRefreshToken();
+    const expired = await isTokenExpired();
+    if (expired) {
+      const refreshToken = await getRefreshToken();
       if (!refreshToken) {
         return res.status(401).json({ error: 'No refresh token available' });
       }
@@ -33,7 +34,7 @@ export default async function handler(req, res) {
         return res.status(401).json({ error: 'Failed to refresh token' });
       }
       accessToken = refreshResult.accessToken;
-      updateAccessToken(accessToken, refreshResult.expiresIn);
+      await updateAccessToken(accessToken, refreshResult.expiresIn);
     }
 
     // Fetch calendar events
@@ -48,11 +49,11 @@ export default async function handler(req, res) {
     if (!eventsResponse.ok) {
       if (eventsResponse.status === 401) {
         // Token invalid, try to refresh
-        const refreshToken = getRefreshToken();
+        const refreshToken = await getRefreshToken();
         if (refreshToken) {
           const refreshResult = await refreshAdminToken(refreshToken);
           if (refreshResult.success) {
-            updateAccessToken(refreshResult.accessToken, refreshResult.expiresIn);
+            await updateAccessToken(refreshResult.accessToken, refreshResult.expiresIn);
             // Retry the request with new token
             const retryResponse = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
               method: 'GET',
