@@ -19,6 +19,6 @@
     "node": "24.x"
   },
   "dependencies": {
-    "@vercel/kv": "^3.0.0"
+    "redis": "^6.1.0"
   }
 }
