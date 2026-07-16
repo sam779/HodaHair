@@ -91,6 +91,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Setup keyboard listeners for lightbox
   window.addEventListener('keydown', handleKeyboard);
 
+  // Setup inquiry form submission
+  const inquiryForm = document.getElementById('inquiryForm');
+  if (inquiryForm) {
+    inquiryForm.addEventListener('submit', handleInquirySubmit);
+  }
+
   // Initialize
   updateHeaderOnScroll();
 });
@@ -120,18 +126,45 @@ function changePage(page) {
 
   currentPage = page;
 
-  // Reset form if going to contact
+  // Reset forms if going to contact or booking
   if (page === 'contact') {
     formSubmitted = false;
-    const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
-      contactForm.reset();
-      updateContactFormUI();
+    const inquiryForm = document.getElementById('inquiryForm');
+    if (inquiryForm) {
+      inquiryForm.reset();
+    }
+  }
+
+  if (page === 'booking') {
+    const bookingSection = document.getElementById('booking-section');
+    if (bookingSection) {
+      const form = bookingSection.querySelector('form');
+      if (form) {
+        form.reset();
+      }
     }
   }
 
   // Scroll to top
   window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function handleInquirySubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const name = form.querySelector('input[type="text"]').value;
+  const email = form.querySelector('input[type="email"]').value;
+  const subject = form.querySelectorAll('input[type="text"]')[1].value;
+  const message = form.querySelector('textarea').value;
+
+  if (!name || !email || !subject || !message) {
+    alert('Please fill in all fields');
+    return;
+  }
+
+  // Show success message
+  alert('Thank you for your message! We will get back to you soon.');
+  form.reset();
 }
 
 // ============ HEADER SCROLL ============
