@@ -149,22 +149,52 @@ function changePage(page) {
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
-function handleInquirySubmit(e) {
+async function handleInquirySubmit(e) {
   e.preventDefault();
   const form = e.target;
-  const name = form.querySelector('input[type="text"]').value;
-  const email = form.querySelector('input[type="email"]').value;
-  const subject = form.querySelectorAll('input[type="text"]')[1].value;
-  const message = form.querySelector('textarea').value;
+  const nameInput = form.querySelector('input[type="text"]');
+  const emailInput = form.querySelector('input[type="email"]');
+  const subjectInput = form.querySelectorAll('input[type="text"]')[1];
+  const textareaInput = form.querySelector('textarea');
+
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const subject = subjectInput.value.trim();
+  const message = textareaInput.value.trim();
 
   if (!name || !email || !subject || !message) {
     alert('Please fill in all fields');
     return;
   }
 
-  // Show success message
-  alert('Thank you for your message! We will get back to you soon.');
-  form.reset();
+  // Disable submit button during submission
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Sending...';
+
+  try {
+    const response = await fetch('/api/contact/inquiry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, subject, message }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to submit inquiry');
+    }
+
+    const result = await response.json();
+    alert('Thank you for your message! We will respond within 2 business days.');
+    form.reset();
+  } catch (error) {
+    console.error('Inquiry submission error:', error);
+    alert('Failed to send message. Please try again or email us directly.');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
 }
 
 // ============ HEADER SCROLL ============
