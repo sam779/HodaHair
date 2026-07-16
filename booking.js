@@ -86,14 +86,17 @@ async function loadAvailableSlots() {
 
 function generateTimeSlots(busySlots, selectedDate) {
   const slots = [];
-  const businessHours = { start: 9, end: 18 }; // 9 AM to 6 PM
+  const businessStart = 9; // 9 AM
+  const businessEnd = 18; // 6 PM
   const serviceDuration = getServiceDuration();
 
-  for (let hour = businessHours.start; hour < businessHours.end; hour++) {
-    const slotTime = new Date(`${selectedDate}T${String(hour).padStart(2, '0')}:00:00`);
+  // Generate consecutive non-overlapping slots
+  let currentHour = businessStart;
+  while (currentHour + serviceDuration <= businessEnd) {
+    const slotTime = new Date(`${selectedDate}T${String(Math.floor(currentHour)).padStart(2, '0')}:${String((currentHour % 1) * 60).padStart(2, '0')}:00`);
     const slotEnd = new Date(slotTime.getTime() + serviceDuration * 60 * 60 * 1000);
 
-    // Check if slot conflicts with busy times
+    // Check if slot conflicts with any busy time
     const isAvailable = !busySlots.some(busy => {
       const busyStart = new Date(busy.start);
       const busyEnd = new Date(busy.end);
@@ -101,12 +104,20 @@ function generateTimeSlots(busySlots, selectedDate) {
     });
 
     if (isAvailable) {
+      const startHour = Math.floor(currentHour);
+      const startMin = Math.round((currentHour % 1) * 60);
+      const endHour = Math.floor(currentHour + serviceDuration);
+      const endMin = Math.round(((currentHour + serviceDuration) % 1) * 60);
+
       slots.push({
         time: slotTime.toISOString(),
-        display: `${String(hour).padStart(2, '0')}:00 - ${String(hour + serviceDuration).padStart(2, '0')}:00`,
+        display: `${String(startHour).padStart(2, '0')}:${String(startMin).padStart(2, '0')} - ${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`,
         duration: serviceDuration,
       });
     }
+
+    // Move to next slot (consecutive, not overlapping)
+    currentHour += serviceDuration;
   }
 
   return slots;

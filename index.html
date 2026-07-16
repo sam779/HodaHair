@@ -131,8 +131,9 @@
   .form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:26px}
   .form-group{display:block;margin-bottom:26px}
   .form-label{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#c9a86a;display:block;margin-bottom:10px}
-  .form-input, .form-textarea, .form-select{width:100%;background:transparent;border:none;border-bottom:1px solid rgba(246,241,233,.3);color:#f6f1e9;padding:10px 0;font-size:16px;outline:none;transition:border-color .3s}
+  .form-input, .form-textarea, .form-select{width:100%;background:transparent;border:none;border-bottom:1px solid rgba(246,241,233,.3);color:#f6f1e9;padding:10px 0;font-size:16px;outline:none;transition:border-color .3s;accent-color:#c9a86a}
   .form-input:focus, .form-textarea:focus, .form-select:focus{border-color:#c9a86a}
+  input[type="date"]::-webkit-calendar-picker-indicator{cursor:pointer;filter:invert(0.8) sepia(0.2) hue-rotate(37deg)}
   .form-textarea{resize:vertical}
   .form-select option{color:#17130f}
 
