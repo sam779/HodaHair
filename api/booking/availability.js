@@ -46,13 +46,16 @@ export default async function handler(req, res) {
     }
 
     // Fetch calendar events
-    const eventsResponse = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+    console.log('[availability] Fetching events from Google Calendar with token:', accessToken ? 'present' : 'null');
+    const eventsResponse = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=' + encodeURIComponent(timeMin) + '&timeMax=' + encodeURIComponent(timeMax), {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
     });
+
+    console.log('[availability] Calendar API response status:', eventsResponse.status);
 
     if (!eventsResponse.ok) {
       if (eventsResponse.status === 401) {
@@ -86,7 +89,13 @@ export default async function handler(req, res) {
     }
 
     const data = await eventsResponse.json();
+    console.log('[availability] Calendar events received:', data.items ? data.items.length + ' events' : 'none');
+    if (data.items && data.items.length > 0) {
+      console.log('[availability] Sample events:', data.items.slice(0, 2).map(e => ({ summary: e.summary, start: e.start, end: e.end })));
+    }
+
     const busy = extractBusySlots(data.items || [], timeMin, timeMax);
+    console.log('[availability] Busy slots extracted:', busy.length, busy);
 
     return res.status(200).json({ busy });
   } catch (error) {
