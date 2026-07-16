@@ -5,6 +5,56 @@ let currentFilter = 'All';
 let lightboxIndex = null;
 let formSubmitted = false;
 
+// ============ MODAL ============
+
+function showModal(title, message, type = 'info', onClose = null) {
+  const modal = document.getElementById('modal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalMessage = document.getElementById('modalMessage');
+
+  modalTitle.textContent = title;
+  modalMessage.textContent = message;
+
+  // Remove all type classes and add the new one
+  modal.classList.remove('success', 'error', 'info');
+  if (type) {
+    modal.classList.add(type);
+  }
+
+  modal.classList.remove('hidden');
+
+  // Store callback for when modal closes
+  if (onClose) {
+    modal.dataset.onClose = onClose;
+  }
+}
+
+function closeModal() {
+  const modal = document.getElementById('modal');
+  modal.classList.add('hidden');
+
+  // Call any onClose callback
+  if (modal.dataset.onClose) {
+    const callback = window[modal.dataset.onClose];
+    if (typeof callback === 'function') {
+      callback();
+    }
+    delete modal.dataset.onClose;
+  }
+}
+
+// Close modal when clicking outside
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('modal');
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+  }
+});
+
 // Gallery data
 const galleryData = [
   { cat: 'Bridal', label: '[ BRIDAL — SOFT UPDO ]', ar: '3/4', bg: '#e7dccb', type: 'light' },
@@ -163,7 +213,7 @@ async function handleInquirySubmit(e) {
   const message = textareaInput.value.trim();
 
   if (!name || !email || !subject || !message) {
-    alert('Please fill in all fields');
+    showModal('Required Fields', 'Please fill in all fields to send your inquiry.', 'error');
     return;
   }
 
@@ -186,11 +236,11 @@ async function handleInquirySubmit(e) {
     }
 
     const result = await response.json();
-    alert('Thank you for your message! We will respond within 2 business days.');
+    showModal('Message Sent!', 'Thank you for reaching out. We will respond to your inquiry within 2 business days.', 'success');
     form.reset();
   } catch (error) {
     console.error('Inquiry submission error:', error);
-    alert('Failed to send message. Please try again or email us directly.');
+    showModal('Submission Failed', 'Failed to send your message. Please try again or email us directly.', 'error');
   } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = originalText;

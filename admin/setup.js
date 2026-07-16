@@ -112,10 +112,9 @@ async function handleEmailSettingsSubmit(e) {
 
   const gmailAddress = document.getElementById('gmailAddress').value.trim();
   const gmailAppPassword = document.getElementById('gmailAppPassword').value.trim();
-  const statusDiv = document.getElementById('emailSettings Status');
 
   if (!gmailAddress || !gmailAppPassword) {
-    alert('Please fill in all fields');
+    showAdminModal('Required Fields', 'Please enter both your Gmail address and app password.', 'error');
     return;
   }
 
@@ -138,19 +137,87 @@ async function handleEmailSettingsSubmit(e) {
       throw new Error(error.error || 'Failed to save settings');
     }
 
-    statusDiv.style.display = 'block';
-    statusDiv.className = 'status success';
-    statusDiv.innerHTML = '<strong>✓ Email settings saved!</strong><br>You\'ll now receive inquiry notifications.';
+    showAdminModal('✓ Email Settings Saved!', 'You\'ll now receive notifications when clients submit inquiries.', 'success');
 
     document.getElementById('emailSettingsForm').style.display = 'none';
     document.getElementById('setupEmailBtn').style.display = 'block';
   } catch (error) {
     console.error('Error saving email settings:', error);
-    statusDiv.style.display = 'block';
-    statusDiv.className = 'status error';
-    statusDiv.textContent = error.message;
+    showAdminModal('Error', error.message, 'error');
   } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Save Email Settings';
   }
+}
+
+function showAdminModal(title, message, type = 'info') {
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+
+  const content = document.createElement('div');
+  content.style.cssText = `
+    background: white;
+    padding: 40px;
+    border-radius: 4px;
+    max-width: 400px;
+    width: 90vw;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  `;
+
+  const titleEl = document.createElement('h2');
+  titleEl.textContent = title;
+  titleEl.style.cssText = `
+    font-family: Arial, sans-serif;
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #17130f;
+  `;
+
+  if (type === 'success') {
+    titleEl.style.color = '#27a745';
+  } else if (type === 'error') {
+    titleEl.style.color = '#dc3545';
+  }
+
+  const msgEl = document.createElement('p');
+  msgEl.textContent = message;
+  msgEl.style.cssText = `
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  `;
+
+  const btn = document.createElement('button');
+  btn.textContent = 'OK';
+  btn.style.cssText = `
+    background: #c9a86a;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-weight: 500;
+  `;
+
+  btn.onclick = () => modal.remove();
+
+  content.appendChild(titleEl);
+  content.appendChild(msgEl);
+  content.appendChild(btn);
+  modal.appendChild(content);
+  document.body.appendChild(modal);
+
+  modal.onclick = (e) => {
+    if (e.target === modal) modal.remove();
+  };
 }

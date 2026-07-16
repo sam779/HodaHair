@@ -230,6 +230,24 @@
   .service-detail-addons{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#a2937f;margin-bottom:12px}
   .addon-tags{display:flex;flex-wrap:wrap;gap:8px}
   .addon-tag{font-size:12.5px;color:#5a4c3d;border:1px solid rgba(74,58,44,.28);padding:8px 15px;border-radius:999px}
+
+  /* Modal */
+  .modal{position:fixed;inset:0;z-index:300;background:rgba(23,19,15,.85);display:flex;align-items:center;justify-content:center;animation:revealFade .3s ease both}
+  .modal.hidden{display:none}
+  .modal-content{background:#f6f1e9;padding:40px;border-radius:4px;max-width:500px;width:90vw;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:revealUp .4s cubic-bezier(.16,.7,.3,1)}
+  .modal-close{position:absolute;top:16px;right:16px;background:transparent;border:none;color:#17130f;font-size:28px;cursor:pointer;opacity:.6;transition:opacity .3s;padding:0;line-height:1}
+  .modal-close:hover{opacity:1}
+  #modalTitle{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;margin-bottom:16px;color:#17130f}
+  #modalMessage{font-size:14px;line-height:1.8;color:#5a4c3d;margin-bottom:24px}
+  .modal.success #modalTitle{color:#27a745}
+  .modal.error #modalTitle{color:#dc3545}
+  .modal.info #modalTitle{color:#17a2b8}
+  .modal-footer{display:flex;gap:12px;justify-content:flex-end}
+  .modal-btn{padding:12px 28px;border:none;border-radius:4px;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:500;cursor:pointer;transition:all .3s}
+  .modal-btn-primary{background:#c9a86a;color:#17130f}
+  .modal-btn-primary:hover{background:#e0c48a}
+  .modal-btn-secondary{background:#e0e0e0;color:#17130f}
+  .modal-btn-secondary:hover{background:#d0d0d0}
 </style>
 </head>
 <body>
@@ -661,6 +679,20 @@
     </div>
     <button class="lightbox-nav lightbox-next" onclick="nextGallery()" aria-label="Next">›</button>
     <div class="lightbox-category" id="lightboxCategory"></div>
+  </div>
+
+  <!-- ============ MODAL ============ -->
+  <div id="modal" class="modal hidden" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <div id="modalBody">
+        <h2 id="modalTitle"></h2>
+        <p id="modalMessage"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-primary" onclick="closeModal()">OK</button>
+      </div>
+    </div>
   </div>
 
 </div>

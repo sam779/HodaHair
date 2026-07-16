@@ -150,7 +150,7 @@ async function confirmBooking() {
   const serviceType = serviceSelect.options[serviceSelect.selectedIndex].text;
 
   if (!clientName || !clientEmail) {
-    alert('Please enter your name and email');
+    showModal('Required Fields', 'Please enter your name and email to continue.', 'error');
     return;
   }
 
@@ -197,31 +197,31 @@ async function confirmBooking() {
     }, 3000);
   } catch (error) {
     console.error('Booking error:', error);
-    alert('Failed to create booking. Please try again.');
+    showModal('Booking Failed', 'We encountered an error while creating your booking. Please try again or contact us.', 'error');
     confirmBtn.disabled = false;
     confirmBtn.textContent = 'Confirm Booking';
   }
 }
 
 function showBookingSuccess(serviceType, startDate, clientName) {
-  const bookingSection = document.getElementById('booking-section');
-  const successMessage = document.createElement('div');
-  successMessage.className = 'booking-success-message';
-  successMessage.innerHTML = `
-    <div style="background: rgba(201, 168, 106, 0.2); border: 1px solid #c9a86a; padding: 24px; border-radius: 4px; text-align: center; margin-bottom: 24px;">
-      <p style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 24px; color: #17130f; margin-bottom: 12px;">✓ Booking Confirmed!</p>
-      <p style="font-size: 14px; color: #5a4c3d; line-height: 1.6;">
-        <strong>${serviceType}</strong><br>
-        ${startDate.toLocaleDateString()} at ${startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}<br>
-        <br>
-        A confirmation email has been sent to your inbox. The appointment has been added to the calendar.
-      </p>
-    </div>
-  `;
+  const dateStr = startDate.toLocaleDateString();
+  const timeStr = startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const message = `${serviceType}\n${dateStr} at ${timeStr}\n\nA confirmation email has been sent to your inbox. The appointment has been added to the calendar.`;
 
-  bookingSection.insertBefore(successMessage, bookingSection.firstChild);
+  showModal('✓ Booking Confirmed!', message, 'success', 'resetBookingForm');
+}
 
-  setTimeout(() => {
-    successMessage.remove();
-  }, 4000);
+function resetBookingForm() {
+  const dateInput = document.getElementById('selectedDate');
+  const timeSlotSelect = document.getElementById('timeSlot');
+  const clientNameInput = document.getElementById('clientName');
+  const clientEmailInput = document.getElementById('clientEmail');
+  const confirmBtn = document.getElementById('confirmBooking');
+
+  dateInput.value = '';
+  timeSlotSelect.innerHTML = '<option>Select a date first</option>';
+  if (clientNameInput) clientNameInput.value = '';
+  if (clientEmailInput) clientEmailInput.value = '';
+  confirmBtn.disabled = false;
+  confirmBtn.textContent = 'Confirm Booking';
 }
