@@ -18,14 +18,12 @@ export default async function handler(req, res) {
     let accessToken;
     try {
       accessToken = await getAccessToken();
-      console.log('[availability] Got access token:', accessToken ? 'present' : 'null');
     } catch (error) {
-      console.error('[availability] Error getting access token:', error);
+      console.error('Error getting access token:', error);
       return res.status(500).json({ error: 'Token store error: ' + error.message });
     }
 
     if (!accessToken) {
-      console.log('[availability] No access token - user needs to complete setup');
       return res.status(401).json({ error: 'Admin calendar not configured. Please complete setup.' });
     }
 
@@ -46,7 +44,6 @@ export default async function handler(req, res) {
     }
 
     // Fetch calendar events
-    console.log('[availability] Fetching events from Google Calendar with token:', accessToken ? 'present' : 'null');
     const eventsResponse = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=' + encodeURIComponent(timeMin) + '&timeMax=' + encodeURIComponent(timeMax), {
       method: 'GET',
       headers: {
@@ -54,8 +51,6 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
       },
     });
-
-    console.log('[availability] Calendar API response status:', eventsResponse.status);
 
     if (!eventsResponse.ok) {
       if (eventsResponse.status === 401) {
@@ -89,13 +84,7 @@ export default async function handler(req, res) {
     }
 
     const data = await eventsResponse.json();
-    console.log('[availability] Calendar events received:', data.items ? data.items.length + ' events' : 'none');
-    if (data.items && data.items.length > 0) {
-      console.log('[availability] Sample events:', data.items.slice(0, 2).map(e => ({ summary: e.summary, start: e.start, end: e.end })));
-    }
-
     const busy = extractBusySlots(data.items || [], timeMin, timeMax);
-    console.log('[availability] Busy slots extracted:', busy.length, busy);
 
     return res.status(200).json({ busy });
   } catch (error) {

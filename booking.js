@@ -65,14 +65,8 @@ async function loadAvailableSlots() {
     const data = await response.json();
     const busySlots = data.busy || [];
 
-    console.log('[booking] Received busy slots from server:', busySlots.length);
-    if (busySlots.length > 0) {
-      console.log('[booking] Sample busy slots:', busySlots.slice(0, 2));
-    }
-
     // Generate available slots
     const availableSlots = generateTimeSlots(busySlots, selectedDate);
-    console.log('[booking] Generated available slots:', availableSlots.length, availableSlots);
 
     if (availableSlots.length === 0) {
       timeSlotSelect.innerHTML = '<option>No available slots this day</option>';
