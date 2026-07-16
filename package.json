@@ -19,6 +19,7 @@
     "node": "24.x"
   },
   "dependencies": {
+    "nodemailer": "^9.0.3",
     "redis": "^6.1.0"
   }
 }

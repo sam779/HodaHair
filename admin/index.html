@@ -232,7 +232,39 @@
       • Bookings will appear in your calendar automatically
     </div>
 
-    <a href="/" class="btn" style="background: #c9a86a; color: #17130f; text-align: center; text-decoration: none; display: block;">
+    <!-- Email Settings Section -->
+    <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #e0e0e0;">
+      <h2 style="font-size: 20px; margin-bottom: 15px; color: #17130f;">Email Settings (Optional)</h2>
+      <p style="font-size: 13px; color: #5a4c3d; margin-bottom: 20px; line-height: 1.6;">
+        To receive notifications when clients submit inquiries through the contact form, you can provide your Gmail credentials. This is optional.
+      </p>
+
+      <form id="emailSettingsForm" style="display: none;">
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-size: 12px; font-weight: 500; margin-bottom: 5px; color: #17130f;">Gmail Address</label>
+          <input type="email" id="gmailAddress" placeholder="your@gmail.com" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-size: 12px; font-weight: 500; margin-bottom: 5px; color: #17130f;">Gmail App Password</label>
+          <input type="password" id="gmailAppPassword" placeholder="Your 16-character app password" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+          <p style="font-size: 11px; color: #5a4c3d; margin-top: 8px;">
+            <a href="https://support.google.com/accounts/answer/185833" target="_blank" class="link">How to create a Gmail app password</a>
+          </p>
+        </div>
+
+        <button type="submit" class="btn" style="margin: 10px 0;">Save Email Settings</button>
+        <button type="button" class="btn" onclick="toggleEmailSettings()" style="background: #ddd; color: #17130f; margin: 10px 0;">Skip for Now</button>
+      </form>
+
+      <button type="button" class="btn" id="setupEmailBtn" onclick="toggleEmailSettings()" style="background: #f6f1e9; color: #17130f; border: 1px solid #ddd; margin: 10px 0;">
+        ⚙ Configure Email Settings
+      </button>
+
+      <div id="emailSettings Status" style="display: none; margin-top: 15px;"></div>
+    </div>
+
+    <a href="/" class="btn" style="background: #c9a86a; color: #17130f; text-align: center; text-decoration: none; display: block; margin-top: 20px;">
       Back to Website
     </a>
   </div>

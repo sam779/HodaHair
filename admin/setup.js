@@ -85,3 +85,72 @@ function showError(message) {
   document.getElementById('errorContent').style.display = 'block';
   document.getElementById('errorMsg').textContent = message;
 }
+
+function toggleEmailSettings() {
+  const form = document.getElementById('emailSettingsForm');
+  const btn = document.getElementById('setupEmailBtn');
+
+  if (form.style.display === 'none') {
+    form.style.display = 'block';
+    btn.style.display = 'none';
+  } else {
+    form.style.display = 'none';
+    btn.style.display = 'block';
+  }
+}
+
+// Setup email settings form submission
+document.addEventListener('DOMContentLoaded', () => {
+  const emailForm = document.getElementById('emailSettingsForm');
+  if (emailForm) {
+    emailForm.addEventListener('submit', handleEmailSettingsSubmit);
+  }
+});
+
+async function handleEmailSettingsSubmit(e) {
+  e.preventDefault();
+
+  const gmailAddress = document.getElementById('gmailAddress').value.trim();
+  const gmailAppPassword = document.getElementById('gmailAppPassword').value.trim();
+  const statusDiv = document.getElementById('emailSettings Status');
+
+  if (!gmailAddress || !gmailAppPassword) {
+    alert('Please fill in all fields');
+    return;
+  }
+
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Saving...';
+
+  try {
+    const response = await fetch('/api/admin/email-settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        gmailAddress,
+        gmailAppPassword,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to save settings');
+    }
+
+    statusDiv.style.display = 'block';
+    statusDiv.className = 'status success';
+    statusDiv.innerHTML = '<strong>✓ Email settings saved!</strong><br>You\'ll now receive inquiry notifications.';
+
+    document.getElementById('emailSettingsForm').style.display = 'none';
+    document.getElementById('setupEmailBtn').style.display = 'block';
+  } catch (error) {
+    console.error('Error saving email settings:', error);
+    statusDiv.style.display = 'block';
+    statusDiv.className = 'status error';
+    statusDiv.textContent = error.message;
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Save Email Settings';
+  }
+}
